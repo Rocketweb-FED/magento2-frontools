@@ -6,7 +6,8 @@ var gulp    = require('gulp'),
       rename: {
         'browser-sync'   : 'browserSync',
         'marked-terminal': 'markedTerminal',
-        'run-sequence'   : 'runSequence'
+        'run-sequence'   : 'runSequence',
+        'postcss-reporter': 'postcssReporter'
       }
     });
 
@@ -31,6 +32,16 @@ Object.keys(config.themes).forEach(name => {
     gulp.task(
       theme.lang + ':' + name + ':' + locale,
       require('./helpers/' + theme.lang)(gulp, plugins, config, name, locale)
+    );
+//*** create sass(less)-lint tasks  for each theme**//
+    gulp.task(
+        'lint:' + theme.lang + ':' + name + ':' + locale,
+        require('./helpers/'+theme.lang+'lint')(gulp, plugins, config, name, locale)
+    );
+/** create postcss css-lint tasks foreach theme**/
+    gulp.task(
+        'ci-' +theme.lang + ':' + name + ':' + locale,
+        require('./helpers/ci-' + theme.lang)(gulp, plugins, config, name, locale)
     );
   });
 });
