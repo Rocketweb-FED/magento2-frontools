@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 module.exports = function(gulp, fs, plugins, config, name, file) {
     return () => {
         // local vars
@@ -9,7 +9,7 @@ module.exports = function(gulp, fs, plugins, config, name, file) {
         config.eslint = require('../helpers/config-loader')('eslint.json', plugins);
     if(!nocache) {
         let eslintResults = {};
-        let cacheFilePath = config.projectPath + theme.src  + 'jslintCache.json';
+        let cacheFilePath = config.projectPath + theme.src  + '/jslintCache.json';
         try {
             eslintResults = JSON.parse(fs.readFileSync(cacheFilePath));
         } catch (e) {

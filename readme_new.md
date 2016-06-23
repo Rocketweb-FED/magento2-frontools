@@ -31,31 +31,30 @@
   * `--nojslint` - cancel watch and lint js files
   * `--nocache` - cancel using cachefiles for langlint and jslint tasks
 
-## New env variable for `dev`, `styles` and `watch` tasks (for SASS themes ONLY)
-   * `--nolanglint` - if true then execute langlint task before compile to css.
+## New env variable for `dev`, `styles` and `watch` tasks
+* `--nolanglint` - if true then execute langlint task before compile to css.
    * Example: gulp styles --theme demo --nolanglint
+    * You can also add
+    * `nolanglint`:true or `nojslint`: true
+    * inside theme declaration in `config/themes.json` instead of --nolanglint flag in CLI
+    * Example:
+    * ....
+    * "demo": {
+    *       "src": "vendor/snowdog/theme-blank-sass",
+    *        "dest": "pub/static/frontend/snowdog/blank",
+    *        "locale": ["en_US"],
+    *        "lang": "scss",
+    *        "nolanglint": true,
+    *        "nojslint": true,
+    *        "postcss": ["plugins.autoprefixer()"]
+    *    }
+    * ....
 
-* You can also add
- * `nolanglint`:true
- * inside theme declaration in `config/themes.json` instead of --nolanglint flag in CLI
- * Example:
- * ....
- * "demo": {
- *       "src": "vendor/snowdog/theme-blank-sass",
- *        "dest": "pub/static/frontend/snowdog/blank",
- *        "locale": ["en_US"],
- *        "lang": "scss",
- *        "nolanglint": true,
- *        "nojslint": true,
- *        "postcss": ["plugins.autoprefixer()"]
- *    }
- * ....
-
-## for `dev` and `watch` tasks you can use
+## New env variable for `dev` and `watch` tasks
 * `--nojslint` flag to cancel linting for js files in theme
 
 
- * NOTES about less linting:
+## NOTES about less linting:
      * NOTE 1:
      * Less linting before compiling less files unable in `dev`, `styles` and `watch` tasks, because only main .less files are in pipeline
      * (which defined in "files" property inside theme declaration)

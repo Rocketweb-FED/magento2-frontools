@@ -27,7 +27,7 @@ module.exports = function() {
 } else {
     themes.forEach(name => {
         var theme = config.themes[name],
-            src = [config.projectPath + theme.src+'/**/images/*.{jpeg,jpg,png,sgv,gif}'];
+            src = [config.projectPath + theme.src+'/**/*.{jpeg,jpg,png,sgv,gif}'];
         gulp.src(src)
             .pipe(plugins.imagemin({
                 progressive: true,
@@ -36,7 +36,6 @@ module.exports = function() {
             .pipe(gulp.dest(function(file) {
                 return file.base;
             }));
-//});
 });
 }
 };

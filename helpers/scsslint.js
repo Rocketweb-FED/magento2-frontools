@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 module.exports = function(gulp, fs, plugins, config, name, locale, file) {
     return () => {
         // local vars

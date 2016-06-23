@@ -1,4 +1,5 @@
-module.exports = function(gulp, plugins, config, name, locale, file) {
+'use strict';
+module.exports = function(gulp, fs, plugins, config, name, locale, file) {
     return () => {
         // local vars
         var theme      = config.themes[name],
@@ -61,50 +62,50 @@ module.exports = function(gulp, plugins, config, name, locale, file) {
             lessFiles = dependencyTreeBuilder(theme, lessFiles);
         }
 
-//        if(!nocache) {
-//            let lesslintResults = {};
-//
-//            let cacheFilePath = config.projectPath + theme.src + '/'+locale+'_lesslintCache.json';
-//
-//            try {
-//                lesslintResults = JSON.parse(fs.readFileSync(cacheFilePath));
-//            } catch (e) {
-//            }
-//
-//            return gulp.src(lessFiles, {read: false})
-//                  .pipe(plugins.plumber({ errorHandler: plugins.notify.onError("Error: <%= error.message %>") }))
-//                .pipe(plugins.if(
-//                    function(file) {
-//                        return lesslintResults[file.path] && lesslintResults[file.path].mtime == file.stat.mtime.toJSON();
-//                    },
-//                    plugins.through2.obj(function(file, enc, callback) {
-//                        file.lesshint = lesslintResults[file.path].lesshint;
-//                        callback(null, file);
-//                    }),
-//                    plugins.combine.obj(
-//                        plugins.through2.obj(function(file, enc, callback) {
-//                            file.contents = fs.readFileSync(file.path);
-//                            callback(null, file);
-//                        }),
-//                        plugins.lesshint({
-//                            "configPath": './config/.lesshintrc'
-//    //                        "failOnError": true
-//                        }),
-//
-//                        plugins.through2.obj(function(file, enc, callback) {
-//                            lesslintResults[file.path] = {
-//                                lesshint: file.lesshint,
-//                                mtime: file.stat.mtime
-//                            };
-//                            callback(null, file);
-//                        }),
-//                        reporter()
-//                    )
-//                ))
-//                .on('end', function() {
-//                    fs.writeFileSync(cacheFilePath, JSON.stringify((lesslintResults)));
-//                });
-//     } else {
+        if(!nocache) {
+            let lesslintResults = {};
+
+            let cacheFilePath = config.projectPath + theme.src + '/'+locale+'_lesslintCache.json';
+
+            try {
+                lesslintResults = JSON.parse(fs.readFileSync(cacheFilePath));
+            } catch (e) {
+            }
+
+            return gulp.src(lessFiles, {read: false})
+                  .pipe(plugins.plumber({ errorHandler: plugins.notify.onError("Error: <%= error.message %>") }))
+                .pipe(plugins.if(
+                    function(file) {
+                        return lesslintResults[file.path] && lesslintResults[file.path].mtime == file.stat.mtime.toJSON();
+                    },
+                    plugins.through2.obj(function(file, enc, callback) {
+                        file.lesshint = lesslintResults[file.path].lesshint;
+                        callback(null, file);
+                    }),
+                    plugins.combine.obj(
+                        plugins.through2.obj(function(file, enc, callback) {
+                            file.contents = fs.readFileSync(file.path);
+                            callback(null, file);
+                        }),
+                        plugins.lesshint({
+                            "configPath": './config/.lesshintrc'
+    //                        "failOnError": true
+                        }),
+
+                        plugins.through2.obj(function(file, enc, callback) {
+                            lesslintResults[file.path] = {
+                                lesshint: file.lesshint,
+                                mtime: file.stat.mtime
+                            };
+                            callback(null, file);
+                        }),
+                        reporter()
+                    )
+                ))
+                .on('end', function() {
+                    fs.writeFileSync(cacheFilePath, JSON.stringify((lesslintResults)));
+                });
+     } else {
         return gulp.src(lessFiles)
             .pipe(plugins.plumber({ errorHandler: plugins.notify.onError("Error: <%= error.message %>") }))
             .pipe(plugins.if(!nocache, plugins.cache('linting')))
@@ -113,6 +114,6 @@ module.exports = function(gulp, plugins, config, name, locale, file) {
                 "failOnError": true
             }))
             .pipe(reporter());
-//     }
+     }
     }
 }
