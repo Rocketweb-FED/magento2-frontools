@@ -1,19 +1,43 @@
 
 ## New Tasks list
 * `langlint` - sass(less) linting
+    * by default langlint use/create/modify cachefile which located in path: `<theme.src>/<theme.locale>_<theme.lang>lintCache.json`.
+    * First run task:  lint all files, create cachefile  and write in cachefile lint errors and mtime for all files. Also all errros show in console.
+    * Subsequent runs: compare current modification time of file and mtime in cachefile => only for recent files(have been modified) do: lint, rewrite record in cachefile and show errors in console.
+    **
     * `--theme name` - Process single theme
+    * `--nocache` - do not use cachefile, lint all files and show errors in console
     * Example: gulp langlint --theme demo
 * `csslint` - create css files to <theme.src>/web folder and add source  information to the output css file for outputting user-understandable content, then execute csslint for generated css files
     * `--theme name` - Process single theme
     * Example: gulp csslint --theme demo
+* `jslint` - js linting for all *.js files inside  `<theme.src>` folder (no separation by locale)
+    * by default jslint use/create/modify cachefile which located in path: `<theme.src>/jslintCache.json`.
+    * `--theme name` - Process single theme
+    * `--nocache` - do not use/create/modify cache file, lint all files and show errors in console
+    * Example: gulp jslint --theme demo
+* `imagemin` - optimize all images. By default (without any flags) will proceed for all `theme.src` folders from `config/themes.json` file
+     * ATTENTION: all images would be overwritten. Old versions will be lost
+     * `--folders '<folder-name-1>,<folder-name-2>'` - process in folders which are specified in folders variable in comma-separated format.
+                                                      Folders path should be relative to `config.projectPath` variable(<your_magento_project> root folder)
+     * Example: gulp imagemin --folders 'pub/media/catalog,pub/media/wysiwyg'
+     *          minimize files in <your_magento_project>/pub/media/catalog/**/* and <your_magento_project>/pub/media/wysiwyg/**/* (all subdirectories will be included).
+     * `--theme name` - Process single theme. NOTE: if `--folders` set, `--theme` will be ignored
+* `watch` - Watch for styles changes and run lang-linting task, then processing task; watch for js changes and run js-linting task
+  * `--theme name` - Process single theme
+  * `--maps` - Toggles source maps generation
+  * `--prod` - Production output - minifies styles
+  * `--nolanglint` - cancel execute lang-linting task
+  * `--nojslint` - cancel watch and lint js files
+  * `--nocache` - cancel using cachefiles for langlint and jslint tasks
 
 ## New env variable for `dev`, `styles` and `watch` tasks (for SASS themes ONLY)
-   * `--langlint` - if true then execute langlint task before compile to css.
-   * Example: gulp styles --theme demo --langlint
+   * `--nolanglint` - if true then execute langlint task before compile to css.
+   * Example: gulp styles --theme demo --nolanglint
 
- * You can also add
- * `langlint`:true
- * inside theme declaration in `config/themes.json` instead of --langlint flag in CLI
+* You can also add
+ * `nolanglint`:true
+ * inside theme declaration in `config/themes.json` instead of --nolanglint flag in CLI
  * Example:
  * ....
  * "demo": {
@@ -21,15 +45,20 @@
  *        "dest": "pub/static/frontend/snowdog/blank",
  *        "locale": ["en_US"],
  *        "lang": "scss",
- *        "langlint": true,
+ *        "nolanglint": true,
+ *        "nojslint": true,
  *        "postcss": ["plugins.autoprefixer()"]
  *    }
  * ....
 
+## for `dev` and `watch` tasks you can use
+* `--nojslint` flag to cancel linting for js files in theme
+
+
  * NOTES about less linting:
      * NOTE 1:
      * Less linting before compiling less files unable in `dev`, `styles` and `watch` tasks, because only main .less files are in pipeline
-     * (which defined in "files" prorerty inside theme decalration)
+     * (which defined in "files" property inside theme declaration)
      * Example:
      * "blank": {
      *     .......
@@ -73,6 +102,3 @@
      *
      *     Resolution:   1. due to lesshint 2.0 in development now, hope bugs will be fixed and we could use just added `langlint` task for less themes in future
      *                   2. any other good less-lint plugin has not been found
-
-
-

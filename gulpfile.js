@@ -1,13 +1,16 @@
 // plugins / functions / modules
 var gulp    = require('gulp'),
     fs      = require('fs'),
-    plugins = require('gulp-load-plugins')({
+    plugins = require('gulp-load-plugins')({   //
       pattern: ['*', '!gulp', '!gulp-load-plugins'],
       rename: {
         'browser-sync'   : 'browserSync',
         'marked-terminal': 'markedTerminal',
         'run-sequence'   : 'runSequence',
-        'postcss-reporter': 'postcssReporter'
+        'postcss-reporter': 'postcssReporter',
+        'gulp-cached': 'cache',
+        'stream-combiner2': 'combine',
+        'pngquant': 'imagemin-pngquant'
       }
     });
 
@@ -36,7 +39,7 @@ Object.keys(config.themes).forEach(name => {
 //*** create sass(less)-lint tasks  for each theme**//
     gulp.task(
         'lint:' + theme.lang + ':' + name + ':' + locale,
-        require('./helpers/'+theme.lang+'lint')(gulp, plugins, config, name, locale)
+        require('./helpers/'+theme.lang+'lint')(gulp, fs, plugins, config, name, locale)
     );
 /** create postcss css-lint tasks foreach theme**/
     gulp.task(
@@ -44,4 +47,9 @@ Object.keys(config.themes).forEach(name => {
         require('./helpers/ci-' + theme.lang)(gulp, plugins, config, name, locale)
     );
   });
+    /**create jslint tasks foreach theme (all locales)**/
+    gulp.task(
+        'jslint:' + name,
+        require('./helpers/jslint')(gulp, fs, plugins, config, name)
+    );
 });

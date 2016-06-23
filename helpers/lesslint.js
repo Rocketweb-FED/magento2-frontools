@@ -3,13 +3,9 @@ module.exports = function(gulp, plugins, config, name, locale, file) {
         // local vars
         var theme      = config.themes[name],
             src        = theme.default ? config.projectPath + theme.dest + '/' + locale : config.projectPath + theme.src,
-            dest       = config.projectPath + theme.dest + '/' + locale + '/css',
-            maps       = plugins.util.env.maps || false,
-            production = plugins.util.env.prod || false,
             lessFiles  = file || [],
-            postcss    = [],
-            parentPath = require('./parent-theme-dir')(name, config),
             srcUnix = plugins.slash(src),
+            nocache   = plugins.util.env.nocache || theme.nocache || false,
             reporter = function () {
                 return plugins.through2.obj(function (file, enc, cb) {
                     var out = [];
@@ -53,6 +49,7 @@ module.exports = function(gulp, plugins, config, name, locale, file) {
 
         // less compiler is dumb as f*ck
         // can't figure out what files to process when path is like "theme/**/*.less"
+        var dependencyTreeBuilder = require('../helpers/dependency-tree-builder');
         if (!lessFiles.length) {
             var files = plugins.globby.sync([
                 src + '/**/*.less',
@@ -60,13 +57,62 @@ module.exports = function(gulp, plugins, config, name, locale, file) {
             ]);
 
             files.forEach(file => lessFiles.push(file));
+        } else {
+            lessFiles = dependencyTreeBuilder(theme, lessFiles);
         }
 
+//        if(!nocache) {
+//            let lesslintResults = {};
+//
+//            let cacheFilePath = config.projectPath + theme.src + '/'+locale+'_lesslintCache.json';
+//
+//            try {
+//                lesslintResults = JSON.parse(fs.readFileSync(cacheFilePath));
+//            } catch (e) {
+//            }
+//
+//            return gulp.src(lessFiles, {read: false})
+//                  .pipe(plugins.plumber({ errorHandler: plugins.notify.onError("Error: <%= error.message %>") }))
+//                .pipe(plugins.if(
+//                    function(file) {
+//                        return lesslintResults[file.path] && lesslintResults[file.path].mtime == file.stat.mtime.toJSON();
+//                    },
+//                    plugins.through2.obj(function(file, enc, callback) {
+//                        file.lesshint = lesslintResults[file.path].lesshint;
+//                        callback(null, file);
+//                    }),
+//                    plugins.combine.obj(
+//                        plugins.through2.obj(function(file, enc, callback) {
+//                            file.contents = fs.readFileSync(file.path);
+//                            callback(null, file);
+//                        }),
+//                        plugins.lesshint({
+//                            "configPath": './config/.lesshintrc'
+//    //                        "failOnError": true
+//                        }),
+//
+//                        plugins.through2.obj(function(file, enc, callback) {
+//                            lesslintResults[file.path] = {
+//                                lesshint: file.lesshint,
+//                                mtime: file.stat.mtime
+//                            };
+//                            callback(null, file);
+//                        }),
+//                        reporter()
+//                    )
+//                ))
+//                .on('end', function() {
+//                    fs.writeFileSync(cacheFilePath, JSON.stringify((lesslintResults)));
+//                });
+//     } else {
         return gulp.src(lessFiles)
             .pipe(plugins.plumber({ errorHandler: plugins.notify.onError("Error: <%= error.message %>") }))
+            .pipe(plugins.if(!nocache, plugins.cache('linting')))
             .pipe(plugins.lesshint({
-                "configPath": './config/.lesshintrc'
+                "configPath": './config/.lesshintrc',
+                "failOnError": true
             }))
             .pipe(reporter());
+//     }
     }
 }
